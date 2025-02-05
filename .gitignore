@@ -1,0 +1,6 @@
+Bot/
+./trading_bot.log
+./trading_bot_ppo.zip
+./trading_env_normalize.pkl
+trading_tensorboard/
+.env/
