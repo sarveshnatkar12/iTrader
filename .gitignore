@@ -3,4 +3,4 @@ Bot/
 ./trading_bot_ppo.zip
 ./trading_env_normalize.pkl
 trading_tensorboard/
-.env/
+.env
