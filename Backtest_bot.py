@@ -8,6 +8,8 @@ from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 from trading_env import TradingEnv
 import pandas as pd
 import pandas_ta as ta
+import sys
+from .constants import STOCK_MAPPINGS
 
 # Load environment variables
 load_dotenv()
@@ -20,20 +22,10 @@ BASE_URL = 'https://paper-api.alpaca.markets'  # Use paper trading URL
 # Initialize Alpaca API
 api = tradeapi.REST(API_KEY, API_SECRET, BASE_URL, api_version='v2')
 
-# Stock mapping: full name to symbol
-stock_mapping = {
-    "Apple": "AAPL",
-    "Tesla": "TSLA",
-    "Nvidia": "NVDA",
-    "Google": "GOOGL",
-    "Microsoft": "MSFT",
-    "Netflix": "NFLX"
-}
-
 def backtest(stock_name):
-    SYMBOL = stock_mapping.get(stock_name)
+    SYMBOL = STOCK_MAPPINGS.get(stock_name)
     if not SYMBOL:
-        raise ValueError(f"Stock name '{stock_name}' not recognized. Available options: {list(stock_mapping.keys())}")
+        raise ValueError(f"Stock name '{stock_name}' not recognized. Available options: {list(STOCK_MAPPINGS.keys())}")
     
     TIMEFRAME = '1H'
     
@@ -150,5 +142,13 @@ def backtest(stock_name):
     print(f"Final Portfolio Value: ${portfolio_values[-1]:.2f}")
     logging.info(f"Final Portfolio Value: ${portfolio_values[-1]:.2f}")
 
-# Run backtest for Nvidia
-backtest("Netflix")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Error: No stock name provided for backtesting.")
+        sys.exit(1)
+    
+    stock_name = sys.argv[1]  # Get stock name from command-line arguments
+    backtest(stock_name)
+
+

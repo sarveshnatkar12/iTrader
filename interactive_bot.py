@@ -11,6 +11,7 @@ import warnings
 from trading_env import TradingEnv
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+import sys
 
 warnings.filterwarnings("ignore", category=UserWarning, module="stable_baselines3")
 
@@ -90,10 +91,10 @@ def analyze_trade(api, stock_name):
     except Exception as e:
         logging.error(f"No active position for {stock_name} ({symbol}) or error fetching position: {e}")
 
-def main():
+def main(stock_name):
     load_dotenv()
     api = tradeapi.REST(os.getenv('ALPACA_API_KEY'), os.getenv('ALPACA_API_SECRET'), 'https://paper-api.alpaca.markets', api_version='v2')
-    stock_name = "Tesla"
+    stock_name = " "
     
     print("Loading model...")
     model_path = f"models/trading_bot_ppo_{stock_name}.zip"
@@ -117,5 +118,11 @@ def main():
         analyze_trade(api, stock_name)
         time.sleep(60)
 
-if __name__ == '__main__':
-    main()
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Error: No stock name provided for backtesting.")
+        sys.exit(1)
+    
+    stock_name = sys.argv[1]
+    main(stock_name)
