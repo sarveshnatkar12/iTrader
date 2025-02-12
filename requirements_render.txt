@@ -48,4 +48,4 @@ urllib3==1.26.5
 virtualenv==20.28.1
 yarl==1.7.2
 zipp==1.0.0
-uvicorn
+uvicorn<0.23.0
