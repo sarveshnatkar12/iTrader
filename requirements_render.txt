@@ -5,7 +5,7 @@ aiosignal==1.2.0
 alpaca-trade-api==3.2.0
 annotated-types==0.7.0
 anyio==4.8.0
-apturl==0.5.2
+# apturl==0.5.2
 astunparse==1.6.3
 async-timeout==4.0.1
 attrs==21.2.0
