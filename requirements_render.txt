@@ -40,6 +40,8 @@ pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2022.1
 PyYAML==5.4.1
+alpaca-trade-api
+alpaca-py
 requests==2.25.1
 sentry-sdk==1.4.3
 python-dotenv
