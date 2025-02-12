@@ -94,7 +94,7 @@ def analyze_trade(api, stock_name):
 def main(stock_name):
     load_dotenv()
     api = tradeapi.REST(os.getenv('ALPACA_API_KEY'), os.getenv('ALPACA_API_SECRET'), 'https://paper-api.alpaca.markets', api_version='v2')
-    stock_name = " "
+    #stock_name = "Google"
     
     print("Loading model...")
     model_path = f"models/trading_bot_ppo_{stock_name}.zip"
