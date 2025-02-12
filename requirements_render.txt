@@ -47,6 +47,11 @@ sentry-sdk==1.4.3
 python-dotenv
 six==1.16.0
 typing-extensions==3.10.0.2
+stable-baseline-3
+gym
+numpy
+pandas
+tenserflow
 urllib3==1.26.5
 virtualenv==20.28.1
 yarl==1.7.2
