@@ -37,3 +37,12 @@ def get_available_stocks():
     """Get the list of stocks available for training and trading."""
     stock_mapping = {"Apple": "AAPL", "Tesla": "TSLA", "Nvidia": "NVDA", "Google": "GOOGL", "Microsoft": "MSFT", "Netflix": "NFLX"}
     return {"available_stocks": list(stock_mapping.keys())}
+
+@app.get("/exit")
+def exit():
+    """Exit All Positions Forcefully"""
+    subprocess.Popen(
+        [sys.executable, "interactive_bot.py", "force_exit"],  # Add argument here
+        env=os.environ.copy()
+    )
+    return {"message": "Force exit command sent successfully!"}
