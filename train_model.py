@@ -88,18 +88,18 @@ env = VecNormalize(env, norm_obs=True, norm_reward=True)
 
 # Initialize PPO model
 model = PPO(
-    'MlpPolicy',
+    'MlpPolicy', #Uses multi-layer perceptron for decision-making.
     env,
-    verbose=1,
+    verbose=1, #Printing training logs
     tensorboard_log=f"./trading_tensorboard/{stock_name}/",
-    learning_rate=1e-04,
-    n_steps=4096,
-    batch_size=128,
-    gamma=0.98,
-    gae_lambda=0.9,
+    learning_rate=1e-04, #Small learning rate for stable learning.
+    n_steps=4096, #No of steps per update
+    batch_size=128, 
+    gamma=0.98, #Discount factor for future reward
+    gae_lambda=0.9, #Balances bias & var
     clip_range=0.2,
-    ent_coef=0.01,
-    max_grad_norm=0.5
+    ent_coef=0.01, #entropy configuration
+    max_grad_norm=0.5 #Prevents exploit gradient
 )
 
 # Train the model
