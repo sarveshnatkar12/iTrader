@@ -9,7 +9,7 @@ from trading_env import TradingEnv
 import pandas as pd
 import pandas_ta as ta
 import sys
-from .constants import STOCK_MAPPINGS
+from constants import STOCK_MAPPINGS
 
 # Load environment variables
 load_dotenv()
@@ -151,5 +151,3 @@ if __name__ == "__main__":
     
     stock_name = sys.argv[1]  # Get stock name from command-line arguments
     backtest(stock_name)
-
-
