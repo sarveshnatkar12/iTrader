@@ -91,6 +91,13 @@ def analyze_trade(api, stock_name):
     except Exception as e:
         logging.error(f"No active position for {stock_name} ({symbol}) or error fetching position: {e}")
 
+def force_exit(api):
+    try:
+        print("exiting all positions...")
+        api.close_all_positions(cancel_orders=True)
+    except Exception as e:
+        print(f"Error exiting positions : {e}")
+
 def main(stock_name):
     load_dotenv()
     api = tradeapi.REST(os.getenv('ALPACA_API_KEY'), os.getenv('ALPACA_API_SECRET'), 'https://paper-api.alpaca.markets', api_version='v2')
@@ -124,5 +131,15 @@ if __name__ == "__main__":
         print("Error: No stock name provided for backtesting.")
         sys.exit(1)
     
-    stock_name = sys.argv[1]
-    main(stock_name)
+    # New Condition to address force_exit
+    if sys.argv[1] == "force_exit":
+        load_dotenv()
+        api = tradeapi.REST(os.getenv('ALPACA_API_KEY'), 
+                          os.getenv('ALPACA_API_SECRET'), 
+                          'https://paper-api.alpaca.markets',
+                          api_version='v2')
+        force_exit(api)
+        print("Force exit completed")
+    else:
+        stock_name = sys.argv[1]
+        main(stock_name)

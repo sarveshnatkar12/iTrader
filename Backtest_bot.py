@@ -141,6 +141,7 @@ def backtest(stock_name):
     print("Trading bot simulation completed.")
     print(f"Final Portfolio Value: ${portfolio_values[-1]:.2f}")
     logging.info(f"Final Portfolio Value: ${portfolio_values[-1]:.2f}")
+    return {results : f"Potfolio Value : ${portfolio_values[-1]:.2f}"}
 
 
 if __name__ == "__main__":
