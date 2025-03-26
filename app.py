@@ -15,10 +15,16 @@ def train_model(stock: str):
     return {"message": f"Training started for {stock}"}
 
 @app.get("/backtest")
-def backtest_model(stock: str):
-    """Backtest the trained model on historical data."""
-    subprocess.Popen([sys.executable, "Backtest_bot.py", stock], env=os.environ.copy())
-    return {"message": f"Backtesting started for {stock}"}
+async def backtest_model(stock: str):
+    """Backtest the trained model on historical data and return the result."""
+    try:
+        result = subprocess.run(
+            [sys.executable, "Backtest_bot.py", stock],
+            capture_output=True, text=True, check=True
+        )
+        return {"message": f"Backtesting completed for {stock}", "data": result.stdout}
+    except subprocess.CalledProcessError as e:
+        return {"error": "Backtesting failed", "details": e.stderr}
 
 @app.get("/trade")
 def start_trading(stock: str):
