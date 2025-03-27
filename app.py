@@ -1,7 +1,8 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 import subprocess
 import os
 import sys
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,33 +12,41 @@ app = FastAPI()
 @app.get("/train")
 def train_model(stock: str):
     """Train the RL model on a specified stock."""
-    subprocess.Popen([sys.executable, "train_model.py", [stock]], env=os.environ.copy())
+    subprocess.Popen([sys.executable, "train_model.py", stock], env=os.environ.copy())
     return {"message": f"Training started for {stock}"}
 
 @app.get("/backtest")
-<<<<<<< HEAD
 async def backtest_model(stock: str):
     """Backtest the trained model on historical data and return the result."""
     try:
-        result = await subprocess.run(
-            [sys.executable, "Backtest_bot.py", stock],
-            capture_output=True, text=True, check=True
-        )
-        return {"message": f"Backtesting completed for {stock}", "data": result.stdout}
-    except subprocess.CalledProcessError as e:
-        return {"error": "Backtesting failed", "details": e.stderr}
-=======
-async def backtest_model(stock: str):
-    """Backtest the trained model on historical data and return the result."""
-    try:
+        # Run backtest and capture output
         result = subprocess.run(
             [sys.executable, "Backtest_bot.py", stock],
-            capture_output=True, text=True, check=True
+            capture_output=True, 
+            text=True, 
+            check=True
         )
-        return {"message": f"Backtesting completed for {stock}", "data": result.stdout}
+        
+        # Try to parse the JSON output
+        try:
+            backtest_results = json.loads(result.stdout)
+            return {
+                "message": f"Backtesting completed for {stock}", 
+                "data": backtest_results
+            }
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return raw output
+            return {
+                "message": f"Backtesting completed for {stock}", 
+                "data": result.stdout
+            }
+    
     except subprocess.CalledProcessError as e:
-        return {"error": "Backtesting failed", "details": e.stderr}
->>>>>>> 37a7dadbd1b3a49c77821047a0f6e5885ca5a3a2
+        # Handle any subprocess errors
+        return {
+            "error": "Backtesting failed", 
+            "details": e.stderr
+        }
 
 @app.get("/trade")
 def start_trading(stock: str):
@@ -61,7 +70,7 @@ def get_available_stocks():
 def exit():
     """Exit All Positions Forcefully"""
     subprocess.Popen(
-        [sys.executable, "interactive_bot.py", "force_exit"],  # Add argument here
+        [sys.executable, "interactive_bot.py", "force_exit"],
         env=os.environ.copy()
     )
     return {"message": "Force exit command sent successfully!"}
