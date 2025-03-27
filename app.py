@@ -35,7 +35,14 @@ async def backtest_model(stock: str):
                 "data": backtest_results
             }
         except json.JSONDecodeError:
-            # If JSON parsing fails, return raw output
+            # If JSON parsing fails, check stderr for any errors
+            if result.stderr:
+                return {
+                    "error": "Backtesting failed", 
+                    "details": result.stderr
+                }
+            
+            # If no error in stderr, return raw stdout
             return {
                 "message": f"Backtesting completed for {stock}", 
                 "data": result.stdout

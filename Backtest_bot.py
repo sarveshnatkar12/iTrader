@@ -10,7 +10,16 @@ from trading_env import TradingEnv
 import pandas as pd
 import pandas_ta as ta
 import sys
-from .constants import STOCK_MAPPINGS
+
+# Import STOCK_MAPPINGS directly or define it here
+STOCK_MAPPINGS = {
+    "Apple": "AAPL", 
+    "Tesla": "TSLA", 
+    "Nvidia": "NVDA", 
+    "Google": "GOOGL", 
+    "Microsoft": "MSFT", 
+    "Netflix": "NFLX"
+}
 
 # Load environment variables
 load_dotenv()
@@ -154,4 +163,10 @@ if __name__ == "__main__":
         sys.exit(1)
     
     stock_name = sys.argv[1]  # Get stock name from command-line arguments
-    backtest(stock_name)
+    try:
+        result = backtest(stock_name)
+        print(json.dumps(result, indent=2))
+    except Exception as e:
+        # Ensure any error is printed to stderr
+        print(f"Error during backtesting: {str(e)}", file=sys.stderr)
+        sys.exit(1)
