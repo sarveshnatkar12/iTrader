@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import os
 import logging
+import json
 from dotenv import load_dotenv
 import alpaca_trade_api as tradeapi
 from stable_baselines3 import PPO
@@ -43,9 +44,6 @@ def backtest(stock_name):
     if data.empty:
         raise ValueError("No data fetched from Alpaca. Check API credentials and data availability.")
     
-    print("Fetched Data Sample:")
-    print(data.head())
-    
     # Compute technical indicators
     data['RSI'] = ta.rsi(data['close'], length=14)
     data.ta.macd(close='close', fast=12, slow=26, signal=9, append=True)
@@ -73,8 +71,6 @@ def backtest(stock_name):
                          'MACDs_12_26_9': 'MACD_signal'}, inplace=True)
 
     # Drop NaN values
-    print("NaN values per column before drop:")
-    print(data.isna().sum())
     data.dropna(inplace=True)
 
     if data.empty:
@@ -83,8 +79,7 @@ def backtest(stock_name):
     # Verify model and environment files exist
     model_path = f"models/trading_bot_ppo_{stock_name}.zip"
     env_path = f"models/trading_env_normalize_{stock_name}.pkl"
-    print(f"Checking model at: {model_path}")
-    print(f"Checking environment at: {env_path}")
+    
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"{model_path} not found. Train the model first.")
     if not os.path.exists(env_path):
@@ -97,7 +92,6 @@ def backtest(stock_name):
     # Load the trained model
     try:
         model = PPO.load(model_path)
-        print("Model loaded successfully.")
     except Exception as e:
         raise RuntimeError(f"Error loading model: {e}")
 
@@ -108,11 +102,11 @@ def backtest(stock_name):
     logging.basicConfig(filename='trading_bot.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info("Starting trading bot simulation...")
 
-    print("Starting trading bot simulation...")
+    # Simulation
     obs = env.reset()
     done = [False]
     portfolio_values = []
-    timestamps = []
+    action_logs = []
 
     while not done[0]:
         action, _ = model.predict(obs, deterministic=True)
@@ -125,24 +119,34 @@ def backtest(stock_name):
             
         portfolio_values.append(current_value)
         
-        step_index = min(len(portfolio_values) - 1, len(data.index) - 1)
-        timestamps.append(data.index[step_index])
+        action_log = {
+            "action": int(action[0]),
+            "reward": float(reward[0]),
+            "net_worth": current_value
+        }
+        action_logs.append(action_log)
         
-        print(f"Action: {action}, Reward: {reward}, Net Worth: {current_value}")
         logging.info(f"Action: {action}, Reward: {reward}, Net Worth: {current_value}")
-        
-        if action == 1:
-            logging.info("Buy action taken.")
-        elif action == 2:
-            logging.info("Sell action taken.")
-        else:
-            logging.info("Hold action taken.")
 
-    print("Trading bot simulation completed.")
-    print(f"Final Portfolio Value: ${portfolio_values[-1]:.2f}")
+    # Prepare results
+    backtest_results = {
+        "stock": stock_name,
+        "initial_portfolio_value": portfolio_values[0],
+        "final_portfolio_value": portfolio_values[-1],
+        "total_return_percentage": ((portfolio_values[-1] - portfolio_values[0]) / portfolio_values[0]) * 100,
+        "action_logs": action_logs
+    }
+
+    # Save results to a file
+    results_file = f"backtest_results_{stock_name}.json"
+    with open(results_file, 'w') as f:
+        json.dump(backtest_results, f, indent=2)
+
+    # Print and log final results
     logging.info(f"Final Portfolio Value: ${portfolio_values[-1]:.2f}")
-    return {results : f"Potfolio Value : ${portfolio_values[-1]:.2f}"}
+    print(json.dumps(backtest_results, indent=2))
 
+    return backtest_results
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -151,5 +155,3 @@ if __name__ == "__main__":
     
     stock_name = sys.argv[1]  # Get stock name from command-line arguments
     backtest(stock_name)
-
-
