@@ -24,8 +24,18 @@ async def backtest_model(stock: str):
             [sys.executable, "Backtest_bot.py", stock],
             capture_output=True, 
             text=True, 
-            check=True
+            check=False  # Remove check=True to capture non-zero exit codes
         )
+        
+        # Check if the process exited with an error
+        if result.returncode != 0:
+            # If there's stderr output, use that
+            error_message = result.stderr.strip() or result.stdout.strip()
+            return {
+                "error": "Backtesting failed", 
+                "details": error_message,
+                "return_code": result.returncode
+            }
         
         # Try to parse the JSON output
         try:
@@ -35,24 +45,17 @@ async def backtest_model(stock: str):
                 "data": backtest_results
             }
         except json.JSONDecodeError:
-            # If JSON parsing fails, check stderr for any errors
-            if result.stderr:
-                return {
-                    "error": "Backtesting failed", 
-                    "details": result.stderr
-                }
-            
-            # If no error in stderr, return raw stdout
+            # If JSON parsing fails, return raw output
             return {
                 "message": f"Backtesting completed for {stock}", 
                 "data": result.stdout
             }
     
-    except subprocess.CalledProcessError as e:
-        # Handle any subprocess errors
+    except Exception as e:
+        # Catch any unexpected errors
         return {
             "error": "Backtesting failed", 
-            "details": e.stderr
+            "details": str(e)
         }
 
 @app.get("/trade")
